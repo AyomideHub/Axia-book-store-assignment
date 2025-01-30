@@ -46,12 +46,10 @@ const deletebook = async (req, res) => {
   }
 
   if (book.createdBy.toString() !== userId) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({
-        success: false,
-        msg: "Unauthorized request, you dont have permission to deleted this book",
-      });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      success: false,
+      msg: "Unauthorized request, you dont have permission to deleted this book",
+    });
   }
 
   const deletedBook = await Book.findOneAndDelete({ _id: bookId });
@@ -83,12 +81,10 @@ const updatebook = async (req, res) => {
   //console.log(userId)
 
   if (book.createdBy.toString() !== userId) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({
-        success: false,
-        msg: "Unauthorized request, you dont have permission to edit this book",
-      });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      success: false,
+      msg: "Unauthorized request, you dont have permission to edit this book",
+    });
   }
 
   const updatedBook = await Book.findOneAndUpdate({ _id: bookId }, req.body, {
@@ -110,10 +106,34 @@ const updatebook = async (req, res) => {
 };
 
 const getBooks = async (req, res) => {
-  const books = await find({});
+  const books = await Book.find({});
+
   res
     .status(StatusCodes.OK)
-    .json({ success: true, msg: "sucessfully", data: { books } });
+    .json({
+      success: true,
+      msg: "sucessfully",
+      data: { books, nbHits: books.length },
+    });
 };
 
-module.exports = { createbook, deletebook, updatebook, getBooks };
+const getBook = async (req, res) => {
+  const bookId = req.params.id;
+
+  const book = await Book.findOne({_id: bookId});
+  if (!book) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ success: false, msg: "No book with such ID" });
+  }
+
+  res
+    .status(StatusCodes.OK)
+    .json({
+      success: true,
+      msg: "sucessfully",
+      data: { book, nbHits: book.length },
+    });
+};
+
+module.exports = { createbook, deletebook, updatebook, getBooks, getBook };
