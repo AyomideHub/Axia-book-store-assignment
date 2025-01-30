@@ -106,7 +106,7 @@ const updatebook = async (req, res) => {
 };
 
 const getBooks = async (req, res) => {
-  const books = await Book.find({});
+  const books = await Book.find({}).populate('createdBy', 'username email');
 
   res
     .status(StatusCodes.OK)
@@ -120,7 +120,7 @@ const getBooks = async (req, res) => {
 const getBook = async (req, res) => {
   const bookId = req.params.id;
 
-  const book = await Book.findOne({_id: bookId});
+  const book = await Book.findOne({_id: bookId}).populate('createdBy', 'username email');
   if (!book) {
     return res
       .status(StatusCodes.BAD_REQUEST)
