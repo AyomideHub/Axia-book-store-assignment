@@ -2,15 +2,16 @@ const Book = require("../models/book.model");
 const { StatusCodes } = require("http-status-codes");
 
 const createbook = async (req, res) => {
-  const { title, decription, category } = req.body;
+  const { title, description, category } = req.body;
+  const userId = req.user.id;
 
-  if (!title || !decription || !category) {
+  if (!title || !description || !category) {
     return res
       .status(StatusCodes.BAD_REQUEST)
       .json({ success: false, msg: "All field are require" });
   }
 
-  let book = await User.findOne({ title });
+  const book = await Book.findOne({ title });
 
   if (book) {
     return res
@@ -18,7 +19,12 @@ const createbook = async (req, res) => {
       .json({ success: false, msg: "Book Already exist" });
   }
 
-  const newbook = await Book.create({ title, decription, category });
+  const newbook = await Book.create({
+    title,
+    description,
+    category,
+    createdBy: userId,
+  });
 
   res.status(StatusCodes.CREATED).json({
     success: true,
@@ -28,10 +34,10 @@ const createbook = async (req, res) => {
 };
 
 const deletebook = async (req, res) => {
-  const bookId  = req.params.id;
-  const userId = req.user;
+  const bookId = req.params.id;
+  const userId = req.user.id;
 
-  const book = await findOne({ _id: bookId });
+  const book = await Book.findOne({ _id: bookId });
 
   if (!book) {
     return res
@@ -39,13 +45,16 @@ const deletebook = async (req, res) => {
       .json({ success: false, msg: "No book with such ID" });
   }
 
-  if (book.createdBy !== userId) {
+  if (book.createdBy.toString() !== userId) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ success: false, msg: "Unauthorized request" });
+      .json({
+        success: false,
+        msg: "Unauthorized request, you dont have permission to deleted this book",
+      });
   }
 
-  const deletedBook = await findOneAndDelete({ _id: bookId });
+  const deletedBook = await Book.findOneAndDelete({ _id: bookId });
 
   if (deletedBook) {
     return res
@@ -59,10 +68,10 @@ const deletebook = async (req, res) => {
 };
 
 const updatebook = async (req, res) => {
-  const bookId = req.param.id;
+  const bookId = req.params.id;
   const userId = req.user.id;
 
-  const book = await findOne({ _id: bookId });
+  const book = await Book.findOne({ _id: bookId });
 
   if (!book) {
     return res
@@ -70,25 +79,29 @@ const updatebook = async (req, res) => {
       .json({ success: false, msg: "No book with such ID" });
   }
 
-  if (book.createdBy !== userId) {
+  //console.log(book.createdBy.toString())
+  //console.log(userId)
+
+  if (book.createdBy.toString() !== userId) {
     return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ success: false, msg: "Unauthorized request" });
+      .json({
+        success: false,
+        msg: "Unauthorized request, you dont have permission to edit this book",
+      });
   }
 
-  const updatedBook = await findOneAndUpdate({ _id: bookId }, req.body, {
+  const updatedBook = await Book.findOneAndUpdate({ _id: bookId }, req.body, {
     new: true,
     runValidators: true,
   });
 
   if (updatedBook) {
-    return res
-      .status(StatusCodes.OK)
-      .json({
-        success: true,
-        msg: "Book updated sucessfully",
-        data: { updatedBook },
-      });
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      msg: "Book updated sucessfully",
+      data: { updatedBook },
+    });
   } else {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

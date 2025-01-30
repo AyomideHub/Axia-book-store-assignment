@@ -18,7 +18,7 @@ const register = async (req, res) => {
 
 	const hashpassword = await bcrypt.hash(password, 10)
 
-	user = await User.create({email, firstname, lastname, password : hashpassword,})
+	user = await User.create({email, username, password : hashpassword,})
 
 	res.status(StatusCodes.CREATED).json({success: true, msg: "registration sucessfull", data: {...user._doc, password: undefined}})
 
