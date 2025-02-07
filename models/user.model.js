@@ -5,13 +5,12 @@ const UserSchema = mongoose.Schema({
 	
 	username: {
 		type: String,
-		require:[true, 'please provide your username'],
+		required:[true, 'please provide your username'],
 		unique: true,
-		trim: true
 	},
 	email:{
 		type: String,
-		require:[true, 'please provide your email'],
+		required:[true, 'please provide your email'],
 		unique: true,
 		validate:{
 			validator: validator.isEmail,
@@ -21,7 +20,7 @@ const UserSchema = mongoose.Schema({
 	},
 	password:{
 		type: String,
-		require:[true, 'please provide your password'],
+		required:[true, 'please provide your password'],
 		minlength: 8
 	},
 	

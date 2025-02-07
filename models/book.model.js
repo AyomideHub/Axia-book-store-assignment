@@ -16,7 +16,6 @@ const bookSchema = mongoose.Schema({
 	
 	  category: {
 		type: String,
-		trim: true,
 		required: [true, 'Please provide product category'],
 	  },
 	  createdBy: {

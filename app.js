@@ -4,6 +4,8 @@ const connectdb = require('./db/connectdb')
 const cookieParser = require('cookie-parser')
 const AuthRoute = require('./routes/Auth.Route')
 const BookRoute = require('./routes/book.route')
+const {errorHandlerMiddleware} = require('./middlewares/errorHandlerMiddleware')
+const notFound = require('./middlewares/NotFouind')
 
 
 const app = express()
@@ -22,6 +24,10 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', AuthRoute)
 app.use('/api/v1/book', BookRoute)
 
+
+// error
+app.use(notFound)
+app.use(errorHandlerMiddleware)
 
 
 const port = process.env.PORT || 5000
