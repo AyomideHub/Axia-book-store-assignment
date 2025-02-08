@@ -10,7 +10,8 @@ const register = async (req, res) => {
 		return res.status(StatusCodes.BAD_REQUEST).json({success: false, msg: "provide correct details"})
 	}
 
-	let user = await User.findOne({email})
+	try {
+		let user = await User.findOne({email})
 
 	if(user){	
 		return res.status(StatusCodes.BAD_REQUEST).json({success: false, msg: "email already in use"})
@@ -21,7 +22,11 @@ const register = async (req, res) => {
 	user = await User.create({email, username, password : hashpassword,})
 
 	res.status(StatusCodes.CREATED).json({success: true, msg: "registration sucessfull", data: {...user._doc, password: undefined}})
-
+		
+	} catch (error) {
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, name: error.name, msg: error.message});
+	}
+	
 }
 
 const login = async (req, res) => {
@@ -29,10 +34,14 @@ const login = async (req, res) => {
 	if (!email || !password){
 		return res.status(StatusCodes.BAD_REQUEST).json({success: false, msg: "invalid credentials"})
 	}
-	const user = await User.findOne({email})
+
+	try {
+
+		const user = await User.findOne({email})
 	if (!user){
 		return res.status(StatusCodes.BAD_REQUEST).json({success: false, msg: "invalid credentials"})
 	}
+
 	const verifyPassword = await bcrypt.compare(password, user.password)
 
 	if(verifyPassword){
@@ -42,19 +51,20 @@ const login = async (req, res) => {
 
 		res.cookie("token", token, {
 			httpOnly: true,
-			secure: false, // for dev mode
+			secure: process.env.NODE_MODE = 'production', // for dev mode
 			sameSite:"strict",
 			maxAge: 7 * 24 * 60 * 60 * 1000,
-			saveUnititialized: true,
-			resave: false 
 		})
 	} else {
 		return res.status(StatusCodes.BAD_REQUEST).json({success: false, msg: "invalid credentials"})
 	}
 
 	res.status(StatusCodes.OK).json({success: true, msg: "login sucessfully", data: {...user._doc, password: undefined}})
+		
+	} catch (error) {
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, name: error.name, msg: error.message});
+	}
 }
-
 const logout = async (req, res) => {
 	res.clearCookie("token")
 	res.status(StatusCodes.OK).json({success: true, msg: "logout successfull"})
