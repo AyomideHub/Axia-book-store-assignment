@@ -3,6 +3,7 @@ const express = require('express')
 const connectdb = require('./db/connectdb')
 const cookieParser = require('cookie-parser')
 const AuthRoute = require('./routes/Auth.Route')
+const  {authenticateUser } = require('./middlewares/authentication')
 const BookRoute = require('./routes/book.route')
 const notFound = require('./middlewares/NotFound')
 
@@ -21,7 +22,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/v1/auth', AuthRoute)
-app.use('/api/v1/book', BookRoute)
+app.use('/api/v1/book', authenticateUser, BookRoute)
 
 
 // not found route

@@ -2,13 +2,14 @@ const Book = require("../models/book.model");
 const { StatusCodes } = require("http-status-codes");
 
 const createbook = async (req, res) => {
-  const { title, description, category } = req.body;
-  const userId = req.user.id;
+  // const { title, description, category } = req.body;
+  // const userId = req.user.id;
+  const {user: {id: userId}, body: {title, description, category}} = req
 
   if (!title || !description || !category) {
     return res
       .status(StatusCodes.BAD_REQUEST)
-      .json({ success: false, msg: "All field are require" });
+      .json({ success: false, msg: "All field are required" });
   }
 
   try {
@@ -29,7 +30,7 @@ const createbook = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     success: true,
-    msg: "registration sucessfull",
+    msg: "Book added sucessfully",
     data: { ...newbook._doc },
 
   });
@@ -41,29 +42,32 @@ const createbook = async (req, res) => {
 };
 
 const deletebook = async (req, res) => {
-  const bookId = req.params.id;
-  const userId = req.user.id;
+  // const bookId = req.params.id;
+  // const userId = req.user.id;
+  const {user: {id: userId}, params: {id: bookId}} = req
 
   try {
-    const book = await Book.findOne({ _id: bookId });
+    // const book = await Book.findOne({ _id: bookId });
 
-    if (!book) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        msg: `No Book with such id ${bookId}`,
-      });
-    }
-    //
+    // if (!book) {
+    //   return res.status(StatusCodes.BAD_REQUEST).json({
+    //     success: false,
+    //     msg: `No Book with such id ${bookId}`,
+    //   });
+    // }
+    
+    // console.log(userId)
+    // console.log(book.createdBy.toString())
    
-    if ( book.createdBy.toString() !== userId ) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
-        success: false,
-        name: error.name,
-        msg: "Unauthorized request, you don't have permission to delete this book",
-      });
-    }
+    // if ( book.createdBy.toString() !== userId ) {
+    //   return res.status(StatusCodes.UNAUTHORIZED).json({
+    //     success: false,
+    //     name: error.name,
+    //     msg: "Unauthorized request, you don't have permission to delete this book",
+    //   });
+    // }
 
-    const deletedBook = await Book.findOneAndDelete({ _id: bookId });
+    const deletedBook = await Book.findOneAndDelete({ _id: bookId, createdBy: userId });
 
     if (deletedBook) {
       return res.status(StatusCodes.OK).json({
@@ -71,9 +75,9 @@ const deletebook = async (req, res) => {
         msg: "Book deleted successfully",
       });
     } else {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      return res.status(StatusCodes.UNAUTHORIZED).json({
         success: false,
-        msg: "Server Error: Unable to delete the book",
+        msg: "Unable to delete the book,",
       });
     }
   } catch (error) {
@@ -87,8 +91,9 @@ const deletebook = async (req, res) => {
 };
 
 const updatebook = async (req, res) => {
-  const bookId = req.params.id;
-  const userId = req.user.id;
+  // const bookId = req.params.id;
+  // const userId = req.user.id;
+  const {user: {id: userId}, params: {id: bookId}} = req
 
   try {
     const book = await Book.findOne({ _id: bookId });
